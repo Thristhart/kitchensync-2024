@@ -1,0 +1,3 @@
+{
+    "extends": "@kitchensync/common/tsconfig.json"
+}
