@@ -29,6 +29,7 @@ export interface SchemaMigrationDBO {
   'version': string | null;
 }
 export interface UserDBO {
+  'display_name': string | null;
   'id': number;
-  'name': string | null;
+  'username': string;
 }
