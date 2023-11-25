@@ -8,27 +8,26 @@ import "dotenv/config";
 if (process.env.DATABASE_URL)
 {
     execFileSync(dbmate.resolveBinary(), ["up"], { stdio: "inherit" });
-}
 
+    const tsString = await sqlts.toTypeScript({
+        client: "better-sqlite3",
+        connection: {
+            filename: "./db/dev.sqlite3"
+        },
+        useNullAsDefault: true,
+        interfaceNameFormat: "${table}DBO",
+        tableNameCasing: "pascal",
+        singularTableNames: true,
+        globalOptionality: "required"
+    });
 
-const tsString = await sqlts.toTypeScript({
-    client: "better-sqlite3",
-    connection: {
-        filename: "./db/dev.sqlite3"
-    },
-    useNullAsDefault: true,
-    interfaceNameFormat: "${table}DBO",
-    tableNameCasing: "pascal",
-    singularTableNames: true,
-    globalOptionality: "required"
-});
+    const modelPath = "./src/data/model.ts";
 
-const modelPath = "./src/data/model.ts";
-
-const existingModel = await fs.readFile(modelPath, "utf8");
-if (existingModel !== tsString)
-{
-    await fs.writeFile(modelPath, tsString);
+    const existingModel = await fs.readFile(modelPath, "utf8");
+    if (existingModel !== tsString)
+    {
+        await fs.writeFile(modelPath, tsString);
+    }
 }
 
 await esbuild.build({
