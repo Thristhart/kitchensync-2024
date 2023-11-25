@@ -86,8 +86,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           source: "${{ github.workspace }}/config/nginx/kitchensync.conf"
-          target: "/srv/containers/kitchensync/"
-          strip_components: 3
+          target: "/srv/nginx/"
+          strip_components: 4
     
       - name: Fetch container in prod and restart
         uses: appleboy/ssh-action@master
@@ -96,5 +96,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-                      podman pull kitchensync
-                      systemctl daemon-reload
+                      sudo podman pull kitchensync
+                      sudo systemctl daemon-reload
+                      sudo systemctl reload nginx
