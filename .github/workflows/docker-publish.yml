@@ -63,6 +63,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
 
     steps:
       - name: checkout
@@ -85,5 +86,5 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-                      podman pull
-                      systemctl restart
+                      podman pull kitchensync
+                      systemctl daemon-reload
