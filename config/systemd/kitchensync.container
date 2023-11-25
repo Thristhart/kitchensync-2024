@@ -1,0 +1,10 @@
+[Unit]
+Description=Kitchen Sync
+
+[Container]
+Image=ghcr.io/thristhart/kitchensync:latest
+Mount=type=bind,source=/srv/containers/kitchensync/db/,target=/mnt/db
+Environment=DATABASE_URL=sqlite:/mnt/db/prod.sqlite3
+
+[Install]
+WantedBy=default.target
