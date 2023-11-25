@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@kitchensync/common": "file:../common",
+        "@kitchensync/frontend": "file:../frontend",
         "@koa/router": "^12.0.1",
         "@rmp135/sql-ts": "^1.18.1",
         "better-sqlite3": "^9.1.1",
