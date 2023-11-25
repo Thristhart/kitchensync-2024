@@ -3,8 +3,12 @@ import sqlts from "@rmp135/sql-ts";
 import * as dbmate from "dbmate";
 import { execFileSync } from "child_process";
 import fs from "fs/promises";
+import "dotenv/config";
 
-execFileSync(dbmate.resolveBinary(), ["up"], { stdio: "inherit" });
+if (process.env.DATABASE_URL)
+{
+    execFileSync(dbmate.resolveBinary(), ["up"], { stdio: "inherit" });
+}
 
 
 const tsString = await sqlts.toTypeScript({
