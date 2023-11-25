@@ -11,4 +11,4 @@ create table public_key_credentials (
 
 -- migrate:down
 
-drop table public_key_credentials
+drop table public_key_credentials;

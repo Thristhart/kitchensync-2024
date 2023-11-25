@@ -4,7 +4,7 @@ create table lobbies (
     display_name TEXT
 );
 
-create table media_object (
+create table media_objects (
     id INTEGER UNIQUE NOT NULL PRIMARY KEY,
     faucet_data TEXT NOT NULL,
     title TEXT,
@@ -35,6 +35,6 @@ create table lobby_users (
 
 -- migrate:down
 
-drop table lobbies
-drop table media_object
-drop table lobby_users
+drop table lobbies;
+drop table media_objects;
+drop table lobby_users;
