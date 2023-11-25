@@ -78,6 +78,16 @@ jobs:
           source: "${{ github.workspace }}/config/systemd/kitchensync.container"
           target: "/etc/containers/systemd/"
           strip_components: 4
+
+      - name: Copy nginx config to prod
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "${{ github.workspace }}/config/nginx/kitchensync.conf"
+          target: "/srv/containers/kitchensync/"
+          strip_components: 3
     
       - name: Fetch container in prod and restart
         uses: appleboy/ssh-action@master
