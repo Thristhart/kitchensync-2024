@@ -7,8 +7,10 @@ import "dotenv/config";
 
 if (process.env.DATABASE_URL)
 {
+    console.log("dbmate up");
     execFileSync(dbmate.resolveBinary(), ["up"], { stdio: "inherit" });
 
+    console.log("generating TS bindings for SQL...");
     const tsString = await sqlts.toTypeScript({
         client: "better-sqlite3",
         connection: {
@@ -30,6 +32,8 @@ if (process.env.DATABASE_URL)
     }
 }
 
+console.log("building backend...");
+
 await esbuild.build({
   entryPoints: ["src/main.ts"],
   bundle: true,
@@ -50,3 +54,5 @@ const __filename = topLevelFileUrlToPath( import.meta.url );
   },
   external: ["dbmate", "better-sqlite3"]
 });
+
+console.log("backend built.")
