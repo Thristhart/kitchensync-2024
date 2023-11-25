@@ -55,6 +55,8 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+
+    steps:
       - name: Copy systemd container to prod
         uses: appleboy/scp-action@master
         with:
