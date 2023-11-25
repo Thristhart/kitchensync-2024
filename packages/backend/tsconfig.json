@@ -1,3 +1,6 @@
 {
-    "extends": "@kitchensync/common/tsconfig.json"
+    "extends": "@kitchensync/common/tsconfig.json",
+    "compilerOptions": {
+        "lib": ["es2022"],
+    }
 }

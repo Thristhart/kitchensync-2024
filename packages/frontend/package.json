@@ -1,3 +1,22 @@
 {
-    "name": "@kitchensync/frontend"
+    "name": "@kitchensync/frontend",
+    "type": "module",
+    "scripts": {
+        "build": "node scripts/build.mjs",
+        "dev": "node scripts/watch.mjs"
+    },
+    "exports": {
+        "./*": "./dist/*"
+    },
+    "dependencies": {
+        "esbuild": "*",
+        "esbuild-plugin-copy": "^2.1.1",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "typescript": "*",
+        "zustand": "^4.4.6"
+    },
+    "devDependencies": {
+        "@types/react-dom": "^18.2.17"
+    }
 }

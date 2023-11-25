@@ -1,3 +1,7 @@
 {
-    "name": "@kitchensync/common"
+    "name": "@kitchensync/common",
+    "type": "module",
+    "dependencies": {
+        "typescript": "*"
+    }
 }

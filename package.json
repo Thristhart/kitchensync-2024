@@ -1,5 +1,10 @@
 {
+    "name": "kitchensync",
     "workspaces": [
         "packages/*"
-    ]
+    ],
+    "dependencies": {
+        "esbuild": "^0.19.6",
+        "typescript": "^5.2.2"
+    }
 }

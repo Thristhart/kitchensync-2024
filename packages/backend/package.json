@@ -1,3 +1,48 @@
 {
-    "name": "@kitchensync/backend"
+    "name": "@kitchensync/backend",
+    "type": "module",
+    "scripts": {
+        "build": "node scripts/build.mjs",
+        "start": "node --enable-source-maps dist/main.js",
+        "dev": "nodemon"
+    },
+    "exports": {
+        "./*": [
+            "./src/*.ts"
+        ]
+    },
+    "dependencies": {
+        "@kitchensync/common": "file:../common",
+        "@koa/router": "^12.0.1",
+        "@rmp135/sql-ts": "^1.18.1",
+        "better-sqlite3": "^9.1.1",
+        "dbmate": "^2.8.0",
+        "dotenv": "^16.3.1",
+        "esbuild": "*",
+        "koa": "^2.14.2",
+        "koa-bodyparser": "^4.4.1",
+        "koa-send": "^5.0.1",
+        "koa-static": "^5.0.0",
+        "nodemon": "^3.0.1",
+        "typescript": "*",
+        "ws": "^8.14.2"
+    },
+    "devDependencies": {
+        "@types/better-sqlite3": "^7.6.8",
+        "@types/koa": "^2.13.11",
+        "@types/koa__router": "^12.0.4",
+        "@types/koa-bodyparser": "^4.3.12",
+        "@types/koa-send": "^4.1.6",
+        "@types/koa-static": "^4.0.4",
+        "@types/node": "^20.9.2",
+        "@types/ws": "^8.5.9"
+    },
+    "nodemonConfig": {
+        "exec": "npm run build && npm start",
+        "ext": "js,mjs,json,ts",
+        "ignore": [
+            ".git",
+            "dist"
+        ]
+    }
 }
