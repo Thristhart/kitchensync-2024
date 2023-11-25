@@ -97,5 +97,5 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
                       sudo podman pull kitchensync
-                      sudo systemctl daemon-reload
+                      sudo systemctl restart kitchensync
                       sudo systemctl reload nginx
