@@ -4,6 +4,7 @@ Description=Kitchen Sync
 [Container]
 Image=ghcr.io/thristhart/kitchensync:latest
 Mount=type=bind,source=/srv/containers/kitchensync/db/,target=/mnt/db
+EnvironmentFile=/srv/containers/kitchensync/env
 Environment=DATABASE_URL=sqlite:/mnt/db/prod.sqlite3
 PublishPort=127.0.0.1:4000:3000
 

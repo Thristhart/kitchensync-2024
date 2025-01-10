@@ -16,6 +16,14 @@ export const context = await esbuild.context({
           to: ['./dist'],
         },
         watch: true,
-    })
+    }),
+    copy({
+        resolveFrom: 'cwd',
+        assets: {
+          from: ['./src/static/*'],
+          to: ['./dist/'],
+        },
+        watch: true,
+    }),
   ]
 });

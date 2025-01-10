@@ -2,16 +2,15 @@ name: Docker
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-
 
 jobs:
   build:
@@ -27,7 +26,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: "20.x"
       - run: npm ci
       - run: npm run build --workspaces --if-present
 
@@ -68,7 +67,25 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      
+
+      - name: Setup SOPS
+        uses: nhedger/setup-sops@v2
+
+      - name: Decrypt prod.env
+        run: sops decrypt prod.env --output decrypted_prod.env
+        working-directory: ${{ github.workspace }}
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_DECRYPT_KEY }}
+
+      - name: Copy decrypted prod.env to prod
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "${{ github.workspace }}/decrypted_prod.env"
+          target: "/srv/containers/kitchensync/env"
+
       - name: Copy systemd container to prod
         uses: appleboy/scp-action@master
         with:
@@ -88,7 +105,7 @@ jobs:
           source: "${{ github.workspace }}/config/nginx/kitchensync.conf"
           target: "/srv/nginx/"
           strip_components: 4
-    
+
       - name: Fetch container in prod and restart
         uses: appleboy/ssh-action@master
         with:
@@ -96,7 +113,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-                      sudo podman pull kitchensync
-                      sudo systemctl daemon-reload
-                      sudo systemctl restart kitchensync
-                      sudo systemctl reload nginx
+            sudo podman pull kitchensync
+            sudo systemctl daemon-reload
+            sudo systemctl restart kitchensync
+            sudo systemctl reload nginx

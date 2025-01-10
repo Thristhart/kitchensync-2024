@@ -1,7 +1,12 @@
 {
-    "name": "@kitchensync/common",
-    "type": "module",
-    "dependencies": {
-        "typescript": "*"
-    }
+  "name": "@kitchensync/common",
+  "type": "module",
+  "dependencies": {
+    "typescript": "*"
+  },
+  "exports": {
+    "./*": [
+      "./src/*.ts"
+    ]
+  }
 }
