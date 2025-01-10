@@ -48,10 +48,7 @@ function WaitingForMagicLink(props: WaitingForMagicLinkProps) {
   return (
     <span>
       We've sent an email to your email address. Click the link in that email
-      within the next 15 minutes to log in on this device. that link is{" "}
-      <a href={magicLink.link} target="_blank">
-        {magicLink.link}
-      </a>{" "}
+      within the next 15 minutes to log in on this device.
       <button>Resend</button>
     </span>
   );
