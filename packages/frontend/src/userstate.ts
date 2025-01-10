@@ -97,6 +97,8 @@ export function useUserInfoQuery() {
         "/api/user/self"
       );
       if ("success" in result && result.success === false) {
+        // probably this was invalid user state, so let's clear it
+        userStore.getState().logout();
         throw new Error("failed to fetch user info");
       }
       return result as UserModel;
