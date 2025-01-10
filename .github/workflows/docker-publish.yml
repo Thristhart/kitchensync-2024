@@ -71,20 +71,20 @@ jobs:
       - name: Setup SOPS
         uses: nhedger/setup-sops@v2
 
-      - name: Decrypt prod.env
-        run: sops decrypt prod.env --output decrypted_prod.env
+      - name: Decrypt encrypted_prod.env
+        run: sops decrypt encrypted_prod.env --output prod.env
         working-directory: ${{ github.workspace }}
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_DECRYPT_KEY }}
 
-      - name: Copy decrypted prod.env to prod
+      - name: Copy prod.env to prod
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "${{ github.workspace }}/decrypted_prod.env"
-          target: "/srv/containers/kitchensync/env"
+          source: "${{ github.workspace }}/prod.env"
+          target: "/srv/containers/kitchensync/"
 
       - name: Copy systemd container to prod
         uses: appleboy/scp-action@master
