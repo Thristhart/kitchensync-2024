@@ -1,10 +1,10 @@
 {
-    "name": "kitchensync",
-    "workspaces": [
-        "packages/*"
-    ],
-    "dependencies": {
-        "esbuild": "^0.19.12",
-        "typescript": "^5.7.2"
-    }
+  "name": "kitchensync",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "esbuild": "^0.19.12",
+    "typescript": "^5.7.2"
+  }
 }
