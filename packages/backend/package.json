@@ -18,6 +18,7 @@
         "@rmp135/sql-ts": "^1.18.1",
         "@sendgrid/mail": "^8.1.4",
         "argon2": "^0.41.1",
+        "base64-arraybuffer": "^1.0.2",
         "better-sqlite3": "^9.1.1",
         "dbmate": "^2.8.0",
         "dotenv": "^16.3.1",

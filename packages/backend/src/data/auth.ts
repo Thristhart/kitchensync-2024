@@ -5,6 +5,10 @@ import {
   MagicLinkDBO,
   TokenDBO,
   WriteTokenDBO,
+  PublicKeyCredentialDBO,
+  WritePublicKeyCredentialDBO,
+  WriteWebauthnChallengeDBO,
+  WebauthnChallengeDBO,
 } from "./model";
 import * as argon2 from "argon2";
 import jwt from "jsonwebtoken";
@@ -16,6 +20,7 @@ const day = 24 * hour;
 
 const magicLinkExpiry = 15 * minute;
 export const refreshTokenExpiry = 30 * day;
+const webAuthnChallengeExpiry = 5 * minute;
 
 const signingSecret = process.env.SIGNING_SECRET;
 if (!signingSecret) {
@@ -39,6 +44,15 @@ export function deleteExpiredTokens() {
   );
   statement.run({
     expiration: Date.now() - refreshTokenExpiry,
+  });
+}
+
+function deleteExpiredWebauthnChallenges() {
+  const statement = database.prepare<{ expiration: number }>(
+    "DELETE FROM webauthn_challenges WHERE timestamp <= @expiration"
+  );
+  statement.run({
+    expiration: Date.now() - webAuthnChallengeExpiry,
   });
 }
 
@@ -136,7 +150,7 @@ export async function consumeRefreshToken(
     return false;
   }
   database
-    .prepare<string>("DELETE FROM tokens WHERE id=?")
+    .prepare<string>("DELETE FROM tokens WHERE refresh_token_id=?")
     .run(refresh_token_id);
   return createTokensForUser(record.user_id, session_ip, session_ua);
 }
@@ -200,4 +214,66 @@ export async function validateAccessToken(access_token: string) {
   } catch (e) {
     return false;
   }
+}
+
+export async function saveWebauthnChallenge(
+  challenge_id: string,
+  challenge: string
+) {
+  deleteExpiredWebauthnChallenges();
+  const statement = database.prepare<WriteWebauthnChallengeDBO>(
+    "INSERT INTO webauthn_challenges (challenge_id, challenge, timestamp) VALUES (@challenge_id, @challenge, @timestamp)"
+  );
+  statement.run({
+    challenge_id,
+    challenge,
+    timestamp: Date.now(),
+  });
+}
+
+export async function getWebauthnChallenge(
+  challenge_id: string
+): Promise<string | undefined> {
+  deleteExpiredWebauthnChallenges();
+  const statement = database.prepare<string>(
+    "SELECT * from webauthn_challenges where challenge_id=? LIMIT 1"
+  );
+  const registration = statement.get(challenge_id) as WebauthnChallengeDBO;
+  if (registration.challenge) {
+    // consume the challenge
+    database
+      .prepare<string>("DELETE from webauthn_challenges where challenge_id=?")
+      .run(challenge_id);
+  }
+  return registration?.challenge;
+}
+export async function associatePublicKeyWithUser(
+  user_id: number,
+  counter: number,
+  public_key: string,
+  external_id: string
+) {
+  database
+    .prepare<WritePublicKeyCredentialDBO>(
+      "INSERT INTO public_key_credentials (user_id, counter, public_key, external_id) VALUES (@user_id, @counter, @public_key, @external_id)"
+    )
+    .run({ user_id, counter, public_key, external_id });
+}
+
+export async function getPublicKeyById(external_id: string) {
+  const statement = database.prepare<string>(
+    "SELECT * from public_key_credentials where external_id=? LIMIT 1"
+  );
+  const registration = statement.get(external_id) as
+    | PublicKeyCredentialDBO
+    | undefined;
+  return registration;
+}
+
+export async function updateCounter(external_id: string, counter: number) {
+  database
+    .prepare<Partial<WritePublicKeyCredentialDBO>>(
+      "UPDATE public_key_credentials SET counter=@counter WHERE external_id=@external_id"
+    )
+    .run({ external_id, counter });
 }

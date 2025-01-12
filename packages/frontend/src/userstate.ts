@@ -77,16 +77,27 @@ export async function makeAuthenticatedRequest<ResponseType>(
   path: string,
   fetchOptions?: RequestInit
 ): Promise<ResponseType | { success: false }> {
-  const userState = userStore.getState();
-  if (!userState.access_token) {
+  if (!userStore.getState().access_token) {
     return { success: false };
   }
-  await userState.refreshIfExpired();
+  await userStore.getState().refreshIfExpired();
+  const access_token = userStore.getState().access_token;
+  if (!access_token) {
+    return { success: false };
+  }
   const response = await fetch(path, {
-    headers: { Authorization: userState.access_token },
     ...fetchOptions,
+    headers: {
+      ...fetchOptions?.headers,
+      Authorization: access_token,
+    },
   });
   return await response.json();
+}
+export function isFailedResponse(
+  request: object
+): request is { success: false } {
+  return "success" in request && !request.success;
 }
 
 export function useUserInfoQuery() {
@@ -97,8 +108,11 @@ export function useUserInfoQuery() {
         "/api/user/self"
       );
       if ("success" in result && result.success === false) {
-        // probably this was invalid user state, so let's clear it
-        userStore.getState().logout();
+        const userState = userStore.getState();
+        if (userState.access_token) {
+          // probably this was invalid access token, so let's clear it
+          userState.logout();
+        }
         throw new Error("failed to fetch user info");
       }
       return result as UserModel;

@@ -1,9 +1,8 @@
 -- migrate:up
 create table public_key_credentials (
-    external_id TEXT,
-    public_key TEXT,
-    counter INTEGER,
-    user_id INTEGER,
+    public_key TEXT NOT NULL,
+    counter INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
     FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON UPDATE CASCADE
