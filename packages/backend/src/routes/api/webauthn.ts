@@ -44,6 +44,7 @@ webAuthnRouter.get("/register", authenticationMiddleware, async (ctx) => {
     randomBytes(16)
   ) as unknown as ArrayBuffer;
   registrationOptions.user.name = userInfo.email;
+  registrationOptions.user.displayName = userInfo.email;
 
   const challengeBase64 = base64.encode(registrationOptions.challenge);
   const challengeId = base64.encode(randomBytes(32));
