@@ -23,6 +23,7 @@ import "./login.css";
 import { Temporal } from "temporal-polyfill";
 
 import { shouldPolyfill } from "@formatjs/intl-durationformat/should-polyfill";
+import { NotificationType, notify } from "./notifications";
 async function durationPolyfill() {
   const unsupportedLocale = shouldPolyfill();
   // This locale is supported
@@ -64,6 +65,11 @@ async function registerPasskey() {
       "/api/webauthn/register"
     );
   if (isFailedResponse(credentialCreationOptions)) {
+    notify({
+      type: NotificationType.Error,
+      data: "Failed to create passkey due to server error",
+      duration: 10000,
+    });
     return false;
   }
   const credential = (await navigator.credentials.create({
@@ -78,6 +84,11 @@ async function registerPasskey() {
   })) as PublicKeyCredential;
 
   if (!credential) {
+    notify({
+      type: NotificationType.Error,
+      data: "Failed to create passkey due to client error",
+      duration: 10000,
+    });
     return false;
   }
 
@@ -113,6 +124,11 @@ async function attemptPasskeyLogin() {
     await fetch("/api/webauthn/login")
   ).json()) as RequestCredentialsOptionsResponse;
   if (isFailedResponse(credentialRequestOptions)) {
+    notify({
+      type: NotificationType.Error,
+      data: "Failed to log in with passkey due to server error",
+      duration: 10000,
+    });
     return false;
   }
 
@@ -124,6 +140,11 @@ async function attemptPasskeyLogin() {
   })) as PublicKeyCredential;
 
   if (!credential) {
+    notify({
+      type: NotificationType.Error,
+      data: "Failed to log in with passkey due to client error",
+      duration: 10000,
+    });
     return false;
   }
 
@@ -151,6 +172,11 @@ async function attemptPasskeyLogin() {
     userStore.getState().login(loginResponseBody.access_token);
     return true;
   } else {
+    notify({
+      type: NotificationType.Error,
+      data: "Failed to log in with passkey",
+      duration: 10000,
+    });
     return false;
   }
 }
@@ -200,6 +226,13 @@ function WaitingForMagicLink(props: WaitingForMagicLinkProps) {
   useEffect(() => {
     if (consumeQuery.data?.success) {
       userState.login(consumeQuery.data.access_token);
+
+      supportsCMA().then((canCreatePasskey) => {
+        // if they can create a passkey, and logged in without a passkey, nag them about it
+        if (canCreatePasskey) {
+          notify({ type: NotificationType.PasskeyNag });
+        }
+      });
     }
   }, [consumeQuery.data]);
 
@@ -278,7 +311,11 @@ export function MagicLinkLogin() {
     </div>
   );
 }
-export function PasskeyRegistration() {
+interface PasskeyRegistrationProps {
+  children?: React.ReactNode;
+  onClick?: () => void;
+}
+export function PasskeyRegistration(props: PasskeyRegistrationProps) {
   const [canRegister, setCanRegister] = useState(false);
   useEffect(() => {
     canCreatePasskey().then((supports) => setCanRegister(supports));
@@ -287,7 +324,30 @@ export function PasskeyRegistration() {
   if (!canRegister) {
     return null;
   }
-  return <button onClick={() => registerPasskey()}>Create a passkey</button>;
+  return (
+    <button
+      className="createPasskeyButton"
+      onClick={() => {
+        registerPasskey().then((success) => {
+          if (success) {
+            notify({
+              type: NotificationType.Success,
+              data: "Created a new passkey!",
+            });
+          } else {
+            notify({
+              type: NotificationType.Error,
+              data: "Failed to create passkey",
+              duration: 10000,
+            });
+          }
+        });
+        props.onClick?.();
+      }}
+    >
+      {props.children ?? "Create a passkey"}
+    </button>
+  );
 }
 
 export function LogoutButton() {

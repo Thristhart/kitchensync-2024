@@ -9,7 +9,7 @@ interface UserState {
   access_token: string | undefined;
   login: (access_token: string) => void;
   logout: () => void;
-  claims: () => undefined | { email: string; exp: number };
+  claims: () => undefined | { email: string; exp: number; sub: number };
   isExpired: () => boolean;
   refresh: () => Promise<void>;
   refreshIfExpired: () => Promise<void>;
@@ -72,6 +72,9 @@ export const userStore = createStore<UserState>()(
     )
   )
 );
+export function getCurrentUserId() {
+  return userStore.getState().claims()?.sub;
+}
 
 export async function makeAuthenticatedRequest<ResponseType>(
   path: string,
