@@ -1,0 +1,31 @@
+@font-face {
+  font-family: "Mallory Extra Condensed Ultra";
+  src: url("/MalloryXCond-Ultra.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Mallory Standard Compact Light";
+  src: url("/MalloryCmpct-Light.woff2") format("woff2");
+}
+header {
+  display: grid;
+  grid-template-areas: "logo empty userinfo";
+  grid-template-columns: auto 1fr auto;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: "Mallory Extra Condensed Ultra";
+  color: black;
+  font-size: 1.4rem;
+  padding-inline: 0.5rem;
+}
+.logo img {
+  width: 32px;
+  margin-inline-end: 0.5rem;
+}
+
+.userInfoButton {
+  grid-area: userinfo;
+  font-family: "Mallory Standard Compact Light";
+}

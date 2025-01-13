@@ -1,4 +1,8 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+} from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
   ConsumeMagicLinkResponse,
@@ -15,6 +19,20 @@ import {
   userStore,
 } from "./userstate";
 import * as base64 from "base64-arraybuffer";
+import "./login.css";
+import { Temporal } from "temporal-polyfill";
+
+import { shouldPolyfill } from "@formatjs/intl-durationformat/should-polyfill";
+async function durationPolyfill() {
+  const unsupportedLocale = shouldPolyfill();
+  // This locale is supported
+  if (!unsupportedLocale) {
+    return;
+  }
+  // Load the polyfill 1st BEFORE loading data
+  await import("@formatjs/intl-durationformat/polyfill-force");
+}
+durationPolyfill();
 
 async function supportsCMA() {
   return (
@@ -138,10 +156,28 @@ async function attemptPasskeyLogin() {
 }
 
 interface WaitingForMagicLinkProps {
-  magicLink: CreateMagicLinkResponse;
+  magicLinkMutation: UseMutationResult<
+    CreateMagicLinkResponse | undefined,
+    Error,
+    string,
+    unknown
+  >;
 }
 function WaitingForMagicLink(props: WaitingForMagicLinkProps) {
-  const { magicLink } = props;
+  const { magicLinkMutation } = props;
+  const magicLink = magicLinkMutation.data!;
+  const now = Temporal.Now.instant();
+  const timeout = Temporal.Instant.fromEpochMilliseconds(
+    magicLinkMutation.submittedAt
+  ).add({
+    minutes: 15,
+  });
+  const duration = now.until(timeout);
+  useEffect(() => {
+    if (duration.sign < 0) {
+      magicLinkMutation.reset();
+    }
+  }, [duration]);
 
   const userState = useStore(userStore);
 
@@ -168,72 +204,78 @@ function WaitingForMagicLink(props: WaitingForMagicLinkProps) {
   }, [consumeQuery.data]);
 
   return (
-    <span>
+    <div className="loginForm">
       We've sent an email to your email address. Click the link in that email
-      within the next 15 minutes to log in on this device.
-      <button>Resend</button>
-    </span>
+      within the next {duration.round("minutes").toLocaleString()} to log in on
+      this device.
+      <div>
+        <button
+          onClick={() => {
+            // TODO: tell server to delete the magic link
+            magicLinkMutation.reset();
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
   );
 }
 export function MagicLinkLogin() {
   const formRef = useRef<HTMLFormElement>(null);
-  const [magicLink, setMagicLink] = useState<
-    CreateMagicLinkResponse | undefined
-  >(undefined);
-  const loginMutation = useMutation({
-    async mutationFn() {
-      if (!formRef.current) {
-        return;
-      }
-      const data = new FormData(formRef.current);
-      const response = await fetch(formRef.current.action, {
+  const magicLinkMutation = useMutation({
+    async mutationFn(email: string) {
+      const response = await fetch(formRef.current!.action, {
         method: "POST",
-        body: JSON.stringify({ email: data.get("email") }),
+        body: JSON.stringify({ email }),
         headers: {
           "content-type": "application/json",
         },
       });
-      const responseData = await response.json();
-      return responseData as CreateMagicLinkResponse;
+      return (await response.json()) as CreateMagicLinkResponse;
     },
   });
 
-  const cmaLoginMutation = useMutation({
+  const passkeyLoginMutation = useMutation({
     mutationFn: attemptPasskeyLogin,
     retry: false,
   });
 
-  if (magicLink) {
-    return <WaitingForMagicLink magicLink={magicLink} />;
+  if (magicLinkMutation.data) {
+    return <WaitingForMagicLink magicLinkMutation={magicLinkMutation} />;
   }
   return (
-    <>
+    <div className="loginForm">
       <form
         ref={formRef}
         method="POST"
         action="/api/auth/by_email"
         onSubmit={async (event) => {
-          event.preventDefault();
-          const linkData = await loginMutation.mutateAsync();
-          if (linkData) {
-            setMagicLink(linkData);
+          if (!formRef.current) {
+            return;
           }
+          const data = new FormData(formRef.current);
+          event.preventDefault();
+          magicLinkMutation.mutate(data.get("email") as string);
         }}
       >
         <label>
-          Log in via email:
+          Log in or sign up:
           <input
             type="text"
             name="email"
             autoComplete="email webauthn"
-            disabled={loginMutation.isPending}
+            placeholder="you@example.com"
+            disabled={magicLinkMutation.isPending}
           />
+          <input type="submit" />
         </label>
       </form>
-      <button onClick={() => cmaLoginMutation.mutate()}>
+      <span>- or -</span>
+      <button onClick={() => passkeyLoginMutation.mutate()}>
         Login via passkey
       </button>
-    </>
+    </div>
   );
 }
 export function PasskeyRegistration() {

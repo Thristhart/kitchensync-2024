@@ -23,14 +23,15 @@ function isValidByEmailBody(body: unknown): body is { email: string } {
 }
 
 async function sendMagicLinkEmail(email: string, url: string) {
-  await sgMail.send({
-    to: email,
-    from: "noreply@sync.kitchen",
-    templateId: "d-53ff9735d23544d295a756bdddac863d",
-    dynamicTemplateData: {
-      url,
-    },
-  });
+  // TODO restore
+  // await sgMail.send({
+  //   to: email,
+  //   from: "noreply@sync.kitchen",
+  //   templateId: "d-53ff9735d23544d295a756bdddac863d",
+  //   dynamicTemplateData: {
+  //     url,
+  //   },
+  // });
 }
 
 // this is logging in, either for the first time or for an existing user

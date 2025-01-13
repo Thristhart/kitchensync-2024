@@ -5,19 +5,42 @@ import {
   MagicLinkLogin as LoginPrompt,
   PasskeyRegistration,
 } from "./login";
+import { Popover } from "./components/popover";
+import "./userinfo.css";
 
 export function UserInfo() {
   const user = useStore(userStore);
   const userInfoQuery = useUserInfoQuery();
   if (!user.access_token) {
-    return <LoginPrompt />;
+    return (
+      <Popover
+        className="userInfoButton"
+        popoverContent={<LoginPrompt />}
+        popoverClassName="userInfoPopover"
+      >
+        login
+      </Popover>
+    );
+  }
+  if (!userInfoQuery.data) {
+    return null;
   }
   return (
-    <span>
-      Signed in as{" "}
+    <Popover
+      className="userInfoButton"
+      popoverContent={<UserSettings />}
+      popoverClassName="userInfoPopover"
+    >
       {userInfoQuery.data?.display_name ?? userInfoQuery.data?.email}
+    </Popover>
+  );
+}
+
+function UserSettings() {
+  return (
+    <>
       <PasskeyRegistration />
       <LogoutButton />
-    </span>
+    </>
   );
 }

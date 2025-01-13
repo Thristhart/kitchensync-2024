@@ -1,0 +1,10 @@
+.popoverAnchor {
+  anchor-name: --popoverAnchor;
+}
+.popover {
+  position-anchor: --popoverAnchor;
+  inset: unset;
+}
+.popover:not(:popover-open):not(dialog[open]) {
+  display: none;
+}
