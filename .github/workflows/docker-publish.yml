@@ -85,7 +85,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: "${{ github.workspace }}/prod.env"
           target: "/srv/containers/kitchensync/"
-          strip_components: 2
+          strip_components: 5
           overwrite: true
 
       - name: Copy systemd container to prod
