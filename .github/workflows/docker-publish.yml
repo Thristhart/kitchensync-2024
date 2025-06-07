@@ -96,7 +96,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: "${{ github.workspace }}/config/systemd/kitchensync.container"
           target: "/etc/containers/systemd/"
-          strip_components: 4
+          strip_components: 7
           overwrite: true
 
       - name: Copy nginx config to prod
@@ -107,7 +107,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: "${{ github.workspace }}/config/nginx/kitchensync.conf"
           target: "/srv/nginx/"
-          strip_components: 4
+          strip_components: 7
           overwrite: true
 
       - name: Fetch container in prod and restart
